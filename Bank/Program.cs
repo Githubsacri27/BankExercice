@@ -5,8 +5,34 @@ List<string> movements = new List<string>();
 List<string> movementsIncomes = new List<string>();
 List<string> movementsOutcomes = new List<string>();
 
+List<string> accountNumbers = new List<string> { "12341234", "987654321", "1111111" };
+List<string> accountPins = new List<string> { "1234", "9876", "1111" };
+
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+// Autenticación
+bool authenticated = false;
+while (!authenticated)
+{
+    Console.WriteLine("Introduce your account number:");
+    string accountNumber = Console.ReadLine();
+
+    Console.WriteLine("Introduce your PIN:");
+    string pin = Console.ReadLine();
+
+    // Buscar si el número de cuenta y el pin coinciden
+    int accountIndex = accountNumbers.IndexOf(accountNumber);
+
+    if (accountIndex != -1 && accountPins[accountIndex] == pin)
+    {
+        authenticated = true;
+        Console.WriteLine("Authentication ok");
+    }
+    else
+    {
+        Console.WriteLine("Invalid account number or PIN. try again.");
+    }
+}
 while (continuar)
 {
     // menú
