@@ -20,22 +20,27 @@ while (!authenticated)
     Console.WriteLine("Introduce your PIN:");
     string pin = Console.ReadLine();
 
-    // Buscar si el número de cuenta y el pin coinciden
-    int accountIndex = accountNumbers.IndexOf(accountNumber);
-
-    if (accountIndex != -1 && accountPins[accountIndex] == pin)
+    for (int i = 0; i < accountNumbers.Count; i++)
     {
-        authenticated = true;
-        Console.WriteLine("Authentication ok");
+        if (accountNumbers[i] == accountNumber && accountPins[i] == pin)
+        {
+            authenticated = true;
+            Console.WriteLine("Authentication ok");
+            break;
+        }
     }
-    else
+    if (!authenticated)
     {
         Console.WriteLine("Invalid account number or PIN. try again.");
     }
 }
+
+
+// menú
 while (continuar)
 {
-    // menú
+
+    Console.WriteLine("****************************");
     Console.WriteLine("Welcome to BankExercice");
     Console.WriteLine("Select one option please:");
     Console.WriteLine("1 - Money income");
@@ -45,16 +50,27 @@ while (continuar)
     Console.WriteLine("5 - List outcomes");
     Console.WriteLine("6 - Show current money");
     Console.WriteLine("7 - Exit");
+    Console.WriteLine("****************************");
 
-    // Leer opción del usuario
-    int options = Convert.ToInt32(Console.ReadLine());
+    // Leer opción del usuario y validar las opciones correctas del menu
+    int options;
+    if (!int.TryParse(Console.ReadLine(), out options) || options < 1 || options > 7)
+    {
+        Console.WriteLine("Invalid option. Please select a valid option (1-7).");
+        continue;
+    }
 
     switch (options)
     {
         case 1:
             // Ingresar dinero
             Console.WriteLine("Introduce money for income:");
-            decimal moneyIncome = Convert.ToDecimal(Console.ReadLine());
+            decimal moneyIncome;
+            // Validar que el ingreso sea un número decimal
+            while (!decimal.TryParse(Console.ReadLine(), out moneyIncome) || moneyIncome <= 0)
+            {
+                Console.WriteLine("Invalid amount. Please enter a valid positive number.");
+            }
 
             saleClient = saleClient + moneyIncome;
             movements.Add($"Income: +{moneyIncome:0.00}€");
@@ -66,7 +82,13 @@ while (continuar)
         case 2:
             // Retirada de dinero
             Console.WriteLine("Introduce money for outcome:");
-            decimal moneyOutcome = Convert.ToDecimal(Console.ReadLine());
+            decimal moneyOutcome;
+            // Validar que la retirada sea un número decimal
+            while (!decimal.TryParse(Console.ReadLine(), out moneyOutcome) || moneyOutcome <= 0)
+            {
+                Console.WriteLine("Invalid amount. Please enter a valid positive number.");
+            }
+
             if (moneyOutcome <= saleClient)
             {
                 saleClient = saleClient - moneyOutcome;
