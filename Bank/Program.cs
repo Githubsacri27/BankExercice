@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+
 bool continuar = true;
-decimal saleClient = 0;
-List<string> movements = new List<string>();
-List<string> movementsIncomes = new List<string>();
-List<string> movementsOutcomes = new List<string>();
+
+List<decimal> accountBalances = new List<decimal> { 0, 0, 0 }; // Saldos para cada cuenta
+List<List<string>> movements = new List<List<string>> { new List<string>(), new List<string>(), new List<string>() };
+List<List<string>> movementsIncomes = new List<List<string>> { new List<string>(), new List<string>(), new List<string>() };
+List<List<string>> movementsOutcomes = new List<List<string>> { new List<string>(), new List<string>(), new List<string>() };
 
 List<string> accountNumbers = new List<string> { "12341234", "987654321", "1111111" };
 List<string> accountPins = new List<string> { "1234", "9876", "1111" };
@@ -11,6 +14,7 @@ List<string> accountPins = new List<string> { "1234", "9876", "1111" };
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 // Autenticación
+int currentAccountIndex = -1;
 bool authenticated = false;
 while (!authenticated)
 {
@@ -25,6 +29,7 @@ while (!authenticated)
         if (accountNumbers[i] == accountNumber && accountPins[i] == pin)
         {
             authenticated = true;
+            currentAccountIndex = i; // Guardo el índice de la cuenta autenticada
             Console.WriteLine("Authentication ok");
             break;
         }
@@ -35,11 +40,9 @@ while (!authenticated)
     }
 }
 
-
 // menú
 while (continuar)
 {
-
     Console.WriteLine("****************************");
     Console.WriteLine("Welcome to BankExercice");
     Console.WriteLine("Select one option please:");
@@ -52,7 +55,6 @@ while (continuar)
     Console.WriteLine("7 - Exit");
     Console.WriteLine("****************************");
 
-    // Leer opción del usuario y validar las opciones correctas del menu
     int options;
     if (!int.TryParse(Console.ReadLine(), out options) || options < 1 || options > 7)
     {
@@ -63,39 +65,35 @@ while (continuar)
     switch (options)
     {
         case 1:
-            // Ingresar dinero
             Console.WriteLine("Introduce money for income:");
             decimal moneyIncome;
-            // Validar que el ingreso sea un número decimal
             while (!decimal.TryParse(Console.ReadLine(), out moneyIncome) || moneyIncome <= 0)
             {
                 Console.WriteLine("Invalid amount. Please enter a valid positive number.");
             }
 
-            saleClient = saleClient + moneyIncome;
-            movements.Add($"Income: +{moneyIncome:0.00}€");
-            movementsIncomes.Add($"+{moneyIncome:0.00}€");
+            accountBalances[currentAccountIndex] += moneyIncome;
+            movements[currentAccountIndex].Add($"Income: +{moneyIncome:0.00}€");
+            movementsIncomes[currentAccountIndex].Add($"+{moneyIncome:0.00}€");
 
-            Console.WriteLine($"Money income registered. Current balance: {saleClient:0.00}€");
+            Console.WriteLine($"Money income registered. Current balance: {accountBalances[currentAccountIndex]:0.00}€");
             break;
 
         case 2:
-            // Retirada de dinero
             Console.WriteLine("Introduce money for outcome:");
             decimal moneyOutcome;
-            // Validar que la retirada sea un número decimal
             while (!decimal.TryParse(Console.ReadLine(), out moneyOutcome) || moneyOutcome <= 0)
             {
                 Console.WriteLine("Invalid amount. Please enter a valid positive number.");
             }
 
-            if (moneyOutcome <= saleClient)
+            if (moneyOutcome <= accountBalances[currentAccountIndex])
             {
-                saleClient = saleClient - moneyOutcome;
-                movements.Add($"Outcome: -{moneyOutcome:0.00}€");
-                movementsOutcomes.Add($"-{moneyOutcome:0.00}€");
+                accountBalances[currentAccountIndex] -= moneyOutcome;
+                movements[currentAccountIndex].Add($"Outcome: -{moneyOutcome:0.00}€");
+                movementsOutcomes[currentAccountIndex].Add($"-{moneyOutcome:0.00}€");
 
-                Console.WriteLine($"Money outcome registered. Current balance: {saleClient:0.00}€");
+                Console.WriteLine($"Money outcome registered. Current balance: {accountBalances[currentAccountIndex]:0.00}€");
             }
             else
             {
@@ -104,15 +102,14 @@ while (continuar)
             break;
 
         case 3:
-            // Listar todos los movimientos
             Console.WriteLine("All movements:");
-            if (movements.Count == 0)
+            if (movements[currentAccountIndex].Count == 0)
             {
                 Console.WriteLine("No movements recorded.");
             }
             else
             {
-                foreach (string movement in movements)
+                foreach (string movement in movements[currentAccountIndex])
                 {
                     Console.WriteLine(movement);
                 }
@@ -120,15 +117,14 @@ while (continuar)
             break;
 
         case 4:
-            // Listar ingresos
             Console.WriteLine("Income movements:");
-            if (movementsIncomes.Count == 0)
+            if (movementsIncomes[currentAccountIndex].Count == 0)
             {
                 Console.WriteLine("No income movements recorded.");
             }
             else
             {
-                foreach (string income in movementsIncomes)
+                foreach (string income in movementsIncomes[currentAccountIndex])
                 {
                     Console.WriteLine(income);
                 }
@@ -136,15 +132,14 @@ while (continuar)
             break;
 
         case 5:
-            // Listar retiradas
             Console.WriteLine("Outcome movements:");
-            if (movementsOutcomes.Count == 0)
+            if (movementsOutcomes[currentAccountIndex].Count == 0)
             {
                 Console.WriteLine("No outcome movements recorded.");
             }
             else
             {
-                foreach (string outcome in movementsOutcomes)
+                foreach (string outcome in movementsOutcomes[currentAccountIndex])
                 {
                     Console.WriteLine(outcome);
                 }
@@ -152,12 +147,10 @@ while (continuar)
             break;
 
         case 6:
-            // Mostrar saldo actual
-            Console.WriteLine($"Current balance: {saleClient:0.00}€");
+            Console.WriteLine($"Current balance: {accountBalances[currentAccountIndex]:0.00}€");
             break;
 
         case 7:
-            // Salir del programa
             continuar = false;
             break;
 
@@ -168,12 +161,11 @@ while (continuar)
 
     if (continuar)
     {
-        // Preguntar si se quiere continuar con otra operación
         Console.WriteLine("Would you like to perform another operation? (y/n)");
         string response = Console.ReadLine().ToLower();
         if (response != "y")
         {
-            Console.WriteLine($"Exiting... Your current balance is: {saleClient:0.00}€");
+            Console.WriteLine($"Exiting... Your current balance is: {accountBalances[currentAccountIndex]:0.00}€");
             continuar = false;
         }
     }
